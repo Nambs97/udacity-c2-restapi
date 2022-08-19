@@ -18,6 +18,29 @@ router.get('/', async (req: Request, res: Response) => {
 
 //@TODO
 //Add an endpoint to GET a specific resource by Primary Key
+router.get('/:id', async (req: Request, res: Response) => {
+    // destruct our path params
+    let { id } = req.params;
+
+    // check to make sure the id is set
+    if (!id) { 
+        // respond with an error if not
+        return res.status(400).send(`Item id is required`);
+    }
+
+    const item = await FeedItem.findByPk(id);
+
+    // respond not found, if we do not have this id
+    if(item === null) {
+        return res.status(404).send(`Item not found`);
+    }
+
+    if(item.url) {
+        item.url = AWS.getGetSignedUrl(item.url);
+    }
+
+    res.send(item);
+});
 
 // update a specific resource
 router.patch('/:id', 
